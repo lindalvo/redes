@@ -19,7 +19,14 @@ while True:
     # Receive the client packet along with the address it is coming from
     message, address = serverSocket.recvfrom(1024)
 
-    print(f"Recebido de {address}: {message.decode()}")
+    try:
+        texto = message.decode()
+    except UnicodeDecodeError:
+        texto = f"<{len(message)} bytes de dados binários>"
+    
+    print(f"Recebido de {address}: {texto}")
+
+    #print(f"Recebido de {address}: {message.decode()}")
     # Capitalize the message from the client
     message = message.upper()
 

@@ -1,5 +1,6 @@
 import socket
 import time
+from datetime import datetime
 
 QUANTIDADE = 10
 TAMANHO_PACOTE = 64  # bytes
@@ -19,16 +20,22 @@ def do_udp_ping(destino, quantidade, tamanho_pacote):
 
     with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
         sock.settimeout(TIMEOUT)
-
         for i in range(1, quantidade + 1):
-            mensagem = bytes(tamanho_pacote)
+            data_hora = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            #mensagem_base = f"PING {i} em {data_hora}"
+            mensagem_base =  "UFPA Mestrado em Ciência da Computação"
+            padding = "X" * max(0, TAMANHO_PACOTE - len(mensagem_base))
+            mensagem = (mensagem_base + padding).encode()
+
             start = time.time()
             try:
                 sock.sendto(mensagem, (dest_ip, PORTA_SERVIDOR))
-                data, _ = sock.recvfrom(2048)
+                resposta, servidor = sock.recvfrom(1024)
                 rtt = (time.time() - start) * 1000
                 rtts.append(rtt)
-                print(f"Resposta {i}: {len(data)} bytes, RTT = {rtt:.2f} ms")
+                resposta_texto = resposta.decode()
+                #print(f"Resposta {i}: {len(resposta)} bytes, RTT = {rtt:.2f} ms")
+                print(f"Resposta {i+1} de {servidor[0]}: '{resposta_texto}' | RTT = {rtt:.2f} ms")
             except socket.timeout:
                 print(f"Resposta {i}: Timeout")
             time.sleep(1)
